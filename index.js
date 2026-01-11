@@ -41,26 +41,36 @@
     }
 
     function addPhoneToggleButton() {
-        if ($('#option_toggle_phone').length > 0) return;
-
-        const phoneOption = `
-            <a id="option_toggle_phone">
-                <i class="fa-solid fa-mobile-screen"></i>
-                <span>📱 Phone</span>
-            </a>
-        `;
-
-        const $optionsContent = $('#options .options-content');
-        if ($optionsContent.length > 0) {
-            $optionsContent.prepend(phoneOption);
-        }
-
-        $('#option_toggle_phone').on('click', function() {
-            $('#options').hide();
-            if (window.AIPhone && window.AIPhone.UI) {
-                window.AIPhone.UI.togglePhone();
+        const checkInterval = setInterval(() => {
+            const $optionsContent = $('#options .options-content');
+            
+            if ($optionsContent.length > 0) {
+                clearInterval(checkInterval);
+                
+                if ($('#option_toggle_phone').length > 0) return;
+                
+                const phoneOption = `
+                    <a id="option_toggle_phone">
+                        <i class="fa-lg fa-solid fa-mobile-screen"></i>
+                        <span>📱 Phone</span>
+                    </a>
+                `;
+                
+                $optionsContent.prepend(phoneOption);
+                
+                $('#option_toggle_phone').on('click', function() {
+                    $('#options').hide();
+                    if (window.AIPhone && window.AIPhone.UI) {
+                        window.AIPhone.UI.togglePhone();
+                    }
+                });
+                
+                console.log('📱 [AI Phone] Toggle button added to options menu');
             }
-        });
+        }, 500);
+        
+        // 10초 후에도 못 찾으면 포기
+        setTimeout(() => clearInterval(checkInterval), 10000);
     }
 
     $(document).ready(function() {
