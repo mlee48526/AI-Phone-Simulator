@@ -10,16 +10,19 @@
             const script = document.createElement('script');
             script.src = `${BASE_PATH}/${fileName}`;
             script.onload = () => {
-                console.log(`📱 [${EXTENSION_NAME}] Loaded: ${fileName}`);
+                console.log(`[${EXTENSION_NAME}] Loaded: ${fileName}`);
                 resolve();
             };
-            script.onerror = (e) => reject(e);
+            script.onerror = (e) => {
+                console.error(`[${EXTENSION_NAME}] Failed to load: ${fileName}`, e);
+                reject(e);
+            };
             document.head.appendChild(script);
         });
     }
 
     async function initialize() {
-        console.log(`🚀 [${EXTENSION_NAME}] Starting...`);
+        console.log(`🚀 [${EXTENSION_NAME}] Starting initialization...`);
 
         try {
             await loadModule('ui.js');
@@ -33,44 +36,41 @@
 
             addPhoneToggleButton();
 
-            console.log(`✅ [${EXTENSION_NAME}] Ready! Press 'X' to open phone.`);
+            console.log(`✅ [${EXTENSION_NAME}] All modules initialized! Press 'X' to toggle phone.`);
 
         } catch (error) {
-            console.error(`❌ [${EXTENSION_NAME}] Failed:`, error);
+            console.error(`❌ [${EXTENSION_NAME}] Initialization failed:`, error);
         }
     }
 
     function addPhoneToggleButton() {
-        const checkInterval = setInterval(() => {
-            const $optionsContent = $('#options .options-content');
-            
-            if ($optionsContent.length > 0) {
-                clearInterval(checkInterval);
-                
-                if ($('#option_toggle_phone').length > 0) return;
-                
-                const phoneOption = `
-                    <a id="option_toggle_phone">
-                        <i class="fa-lg fa-solid fa-mobile-screen"></i>
-                        <span>📱 Phone</span>
-                    </a>
-                `;
-                
+        if ($('#option_toggle_phone').length > 0) return;
+
+        const $optionsContent = $('#options .options-content');
+        if ($optionsContent.length > 0) {
+            const phoneOption = `
+                <a id="option_toggle_phone">
+                    <i class="fa-lg fa-solid fa-mobile-screen"></i>
+                    <span>📱 Phone</span>
+                </a>
+            `;
+
+            const $anOption = $('#option_toggle_AN');
+            if ($anOption.length > 0) {
+                $anOption.after(phoneOption);
+            } else {
                 $optionsContent.prepend(phoneOption);
-                
-                $('#option_toggle_phone').on('click', function() {
-                    $('#options').hide();
-                    if (window.AIPhone && window.AIPhone.UI) {
-                        window.AIPhone.UI.togglePhone();
-                    }
-                });
-                
-                console.log('📱 [AI Phone] Toggle button added to options menu');
             }
-        }, 500);
-        
-        // 10초 후에도 못 찾으면 포기
-        setTimeout(() => clearInterval(checkInterval), 10000);
+
+            $('#option_toggle_phone').on('click', function() {
+                $('#options').hide();
+                if (window.AIPhone && window.AIPhone.UI) {
+                    window.AIPhone.UI.togglePhone();
+                }
+            });
+
+            console.log(`📱 [${EXTENSION_NAME}] Phone toggle button added to options menu.`);
+        }
     }
 
     $(document).ready(function() {
